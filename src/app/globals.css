@@ -1,0 +1,234 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Pringgodani Administrative design system — transcribed verbatim from the
+ * prototype's `tailwind.config` (in every `code.html`) and cross-checked
+ * against `DESIGN.md`. This is the source of truth for the public site;
+ * do not hand-tune these values per-page.
+ *
+ * The brand is strict Light Mode only ("mirrors the appearance of official
+ * physical documents" — DESIGN.md) — no dark mode variant is defined.
+ *
+ * shadcn/ui semantic tokens (--color-background, --color-primary, etc. —
+ * used by src/shared/ui/button.tsx and future shadcn components) are mapped
+ * directly onto this palette below, so shadcn primitives stay visually
+ * consistent with the rest of the site automatically.
+ */
+@theme {
+  /* ---- Raw palette (exact names/values from code.html tailwind.config) ---- */
+  --color-outline: #707974;
+  --color-outline-variant: #bfc9c3;
+  --color-surface: #f8faf6;
+  --color-surface-dim: #d8dbd7;
+  --color-surface-bright: #f8faf6;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f1;
+  --color-surface-container: #eceeeb;
+  --color-surface-container-high: #e7e9e5;
+  --color-surface-container-highest: #e1e3e0;
+  --color-surface-variant: #e1e3e0;
+  --color-surface-tint: #2b6954;
+  --color-on-surface: #191c1b;
+  --color-on-surface-variant: #404944;
+  --color-inverse-surface: #2e312f;
+  --color-inverse-on-surface: #eff1ee;
+
+  --color-primary: #003527;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #064e3b;
+  --color-on-primary-container: #80bea6;
+  --color-inverse-primary: #95d3ba;
+  --color-primary-fixed: #b0f0d6;
+  --color-primary-fixed-dim: #95d3ba;
+  --color-on-primary-fixed: #002117;
+  --color-on-primary-fixed-variant: #0b513d;
+
+  --color-secondary: #006399;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #7bc2ff;
+  --color-on-secondary-container: #004f7b;
+  --color-secondary-fixed: #cde5ff;
+  --color-secondary-fixed-dim: #94ccff;
+  --color-on-secondary-fixed: #001d32;
+  --color-on-secondary-fixed-variant: #004b74;
+
+  --color-tertiary: #4f1f19;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #6b342d;
+  --color-on-tertiary-container: #ea9e93;
+  --color-tertiary-fixed: #ffdad5;
+  --color-tertiary-fixed-dim: #ffb4a9;
+  --color-on-tertiary-fixed: #380d08;
+  --color-on-tertiary-fixed-variant: #6e372f;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-background: #f8faf6;
+  --color-on-background: #191c1b;
+
+  --color-status-verified: #10b981;
+  --color-status-pending: #f59e0b;
+  --color-nature-green: #15803d;
+  --color-admin-surface: #f8fafc;
+
+  /* ---- Typography: font-family utilities (font-headline-lg, font-body-base, dst) ----
+     Use local/system fallbacks so builds do not depend on remote font fetching. */
+  --font-display-hero: "Hanken Grotesk", "Trebuchet MS", Arial, sans-serif;
+  --font-headline-lg: "Hanken Grotesk", "Trebuchet MS", Arial, sans-serif;
+  --font-headline-lg-mobile:
+    "Hanken Grotesk", "Trebuchet MS", Arial, sans-serif;
+  --font-headline-md: "Hanken Grotesk", "Trebuchet MS", Arial, sans-serif;
+  --font-body-lg: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-body-base: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-label-sm: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-badge-xs: "Inter", "Segoe UI", Arial, sans-serif;
+
+  /* ---- Typography: text-size utilities (text-headline-lg, text-body-base, dst) ---- */
+  --text-display-hero: 48px;
+  --text-display-hero--line-height: 56px;
+  --text-display-hero--letter-spacing: -0.02em;
+  --text-display-hero--font-weight: 700;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--font-weight: 600;
+
+  --text-headline-lg-mobile: 24px;
+  --text-headline-lg-mobile--line-height: 32px;
+  --text-headline-lg-mobile--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-base: 16px;
+  --text-body-base--line-height: 24px;
+  --text-body-base--font-weight: 400;
+
+  --text-label-sm: 14px;
+  --text-label-sm--line-height: 20px;
+  --text-label-sm--font-weight: 500;
+
+  --text-badge-xs: 12px;
+  --text-badge-xs--line-height: 16px;
+  --text-badge-xs--letter-spacing: 0.05em;
+  --text-badge-xs--font-weight: 700;
+
+  /* ---- Spacing (gutter, section-padding, stack-sm/md/lg, container-max) ---- */
+  --spacing-gutter: 1.5rem;
+  --spacing-section-padding: 5rem;
+  --spacing-stack-sm: 0.5rem;
+  --spacing-stack-md: 1rem;
+  --spacing-stack-lg: 2rem;
+  --spacing-container-max: 1280px;
+
+  /* ---- shadcn/ui semantic aliases → mapped onto the palette above ---- */
+  --radius: 0.5rem;
+  --color-foreground: var(--color-on-background);
+  --color-card: var(--color-surface-container-lowest);
+  --color-card-foreground: var(--color-on-surface);
+  --color-popover: var(--color-surface-container-lowest);
+  --color-popover-foreground: var(--color-on-surface);
+  --color-primary-foreground: var(--color-on-primary);
+  --color-secondary-foreground: var(--color-on-secondary);
+  --color-muted: var(--color-surface-container);
+  --color-muted-foreground: var(--color-on-surface-variant);
+  --color-accent: var(--color-primary-container);
+  --color-accent-foreground: var(--color-on-primary-container);
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: var(--color-on-error);
+  --color-border: var(--color-outline-variant);
+  --color-input: var(--color-outline-variant);
+  --color-ring: var(--color-secondary);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .glass-effect {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Scroll-reveal-on-view animation, per the prototype's IntersectionObserver
+     pattern — implemented as a React hook (shared/hooks/use-scroll-reveal.ts)
+     that toggles this same class pair. */
+  .scroll-reveal {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .scroll-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* Horizontally scrollable rows (UMKM category chips) keep the swipe
+     affordance without the scrollbar, as in the prototype — which got this
+     from a Tailwind plugin that is not part of the build here. */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .glass-panel {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.85);
+  }
+
+  .map-container {
+    height: calc(100vh - 64px);
+  }
+
+  @keyframes markerPulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.12);
+      opacity: 0.85;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  .marker-pulse {
+    animation: markerPulse 2s infinite ease-in-out;
+  }
+}

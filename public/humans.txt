@@ -1,0 +1,22 @@
+/* TEAM */
+Project: Website Resmi Desa Pringgodani
+Initiative: Kuliah Kerja Nyata (KKN) 2026
+University: Universitas Muhammadiyah Malang
+Location: Desa Pringgodani, Kec. Bantur, Kab. Malang, Jawa Timur
+
+/* CONTRIBUTORS */
+Koordinator Wilayah: Intan Permata Sari
+Sekretaris: Eka Miftahul Safitrah, Anggun Dwi Pamungkas
+Bendahara: Luna Kayla Az-Zahra, Mevista Angelia Widianti
+Bidang Program & Pengabdian: Amir Kholid Thalib, Kus Indrayani, Ainun Ayu Pratiwi Agustin, Aldila Nina Marlinda, Galang Cahaya Rosul
+Bidang Keagamaan & Sosial Kemasyarakatan: Diva Nayla Arsita Dewi, Haekal Hasni, Faizul Mushofa, Ika Bay
+Bidang Dokumentasi & Publikasi: Asera Zaskhia Wusono, Karina Rahma Aulia, Karina Putri Ani, Clara Amelia, Abdul Rosyid Shidiq
+Bidang Keamanan & Kesehatan: Aura Angelyna A’dn, Azkha Rizky Ilham Affandi, Adi Setiawan, Ahmad Al Buchari A, Fatma Ali Mauladawilah
+Bidang Kerja Sama & Hubungan Masyarakat: Arengga Abim Saputra, Alvino Dwinova, Feri Ardiansyah Putra, Jessica Olivia Madofa, Bima Satryo Wicaksono
+
+/* THANKS */
+Pemerintah Desa Pringgodani & Seluruh Warga Masyarakat Pringgodani
+
+/* SITE */
+Standards: HTML5, CSS3, TypeScript, React, Next.js, TailwindCSS
+Components: Framer Motion, Lucide Icons
