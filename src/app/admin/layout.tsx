@@ -49,6 +49,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Google Indexing", href: "/admin/indexing", icon: "travel_explore" },
       { label: "Pengaturan Website", href: "/admin/settings", icon: "settings" },
+      { label: "Persetujuan Admin", href: "/admin/admin-users", icon: "admin_panel_settings" },
     ],
   },
 ];
@@ -58,20 +59,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [pendingCount, setPendingCount] = useState(0);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const isLoginPage = pathname === "/admin/login";
+  const isPublicAuthPage = [
+    "/admin/login",
+    "/admin/register",
+    "/admin/forgot-password",
+    "/admin/reset-password",
+  ].includes(pathname);
 
   useEffect(() => {
-    if (!isLoginPage && !AdminAuthService.isAuthenticated()) {
+    if (!isPublicAuthPage && !AdminAuthService.isAuthenticated()) {
       router.push("/admin/login");
       return;
     }
 
-    if (!isLoginPage) {
+    if (!isPublicAuthPage) {
       AdminSubmissionsService.getPendingSubmissions().then((data) => {
         setPendingCount(data.totalPending);
       });
     }
-  }, [pathname, isLoginPage, router]);
+  }, [pathname, isPublicAuthPage, router]);
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -84,7 +90,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     router.push("/admin/login");
   };
 
-  if (isLoginPage) {
+  if (isPublicAuthPage) {
     return (
       <div className="bg-surface text-on-surface min-h-screen">
         <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>

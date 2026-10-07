@@ -49,7 +49,7 @@ export function AdminUmkmList() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus UMKM "${name}"?`)) {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus UMKM "${name}"?`)) {
       await AdminUmkmService.deleteUmkm(id);
       showToast(`UMKM "${name}" telah dihapus.`);
       loadUmkm();

@@ -49,7 +49,7 @@ export function AdminBeritaList() {
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus berita "${title}"?`)) {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus berita "${title}"?`)) {
       await AdminNewsService.deleteNews(id);
       showToast(`Berita "${title}" telah dihapus.`);
       loadNews();

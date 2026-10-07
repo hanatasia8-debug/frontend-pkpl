@@ -14,6 +14,8 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "verifying" | "redirecting" | "error">("idle");
 
   const isBusy = status === "verifying" || status === "redirecting";
@@ -35,31 +37,56 @@ export default function AdminLoginPage() {
     event.preventDefault();
     if (isBusy) return;
 
-    setStatus("verifying");
-    setErrorMsg(null);
+    const nextErrors: Record<string, string> = {};
+    const isDevelopmentAdminAlias =
+      process.env.NODE_ENV === "development" &&
+      username.trim().toLowerCase() === "admin";
+    if (!username.trim()) {
+      nextErrors.username = "Email wajib diisi.";
+    } else if (
+      !isDevelopmentAdminAlias &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)
+    ) {
+      nextErrors.username = "Masukkan alamat email dengan format yang valid.";
+    }
+    if (!password) {
+      nextErrors.password = "Kata sandi wajib diisi.";
+    } else if (password.length < 8) {
+      nextErrors.password = "Kata sandi minimal 8 karakter.";
+    }
 
+    setFieldErrors(nextErrors);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    if (Object.keys(nextErrors).length > 0) {
+      setStatus("error");
+      if (nextErrors.username) {
+        document.getElementById("username")?.focus();
+      } else {
+        passwordInputRef.current?.focus();
+      }
+      return;
+    }
+
+    setStatus("verifying");
     try {
       const result = await AdminAuthService.login(username, password);
 
-      if (result.success) {
-        setStatus("redirecting");
-        router.replace("/admin/dashboard");
-        router.refresh();
-      } else {
+      if (!result.success) {
         setStatus("error");
-        setErrorMsg(
-          result.message || "Email atau kata sandi tidak cocok. Silakan coba lagi.",
-        );
-        setTimeout(() => {
-          passwordInputRef.current?.focus();
-        }, 100);
-      }
-    } catch {
-      setStatus("error");
-      setErrorMsg("Terjadi gangguan koneksi ke server. Silakan coba beberapa saat lagi.");
-      setTimeout(() => {
+        setErrorMsg(result.message || "Gagal masuk. Periksa email dan kata sandi Anda.");
         passwordInputRef.current?.focus();
-      }, 100);
+        return;
+      }
+
+      setStatus("redirecting");
+      setSuccessMsg("Login berhasil. Mengalihkan ke dashboard admin...");
+      router.replace("/admin/dashboard");
+      router.refresh();
+    } catch (error) {
+      console.error("Gagal memproses login admin:", error);
+      setStatus("error");
+      setErrorMsg("Tidak dapat terhubung ke server autentikasi. Coba lagi.");
     }
   };
 
@@ -102,6 +129,11 @@ export default function AdminLoginPage() {
             <span className="leading-snug">{errorMsg}</span>
           </div>
         )}
+        {successMsg && (
+          <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-800">
+            {successMsg}
+          </div>
+        )}
 
         {/* Success Redirecting Feedback Box */}
         {status === "redirecting" && (
@@ -112,7 +144,19 @@ export default function AdminLoginPage() {
         )}
 
         {/* Form Controls */}
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+        <form
+          className="mt-6 space-y-4"
+          onSubmit={handleSubmit}
+          onInvalid={(event) => {
+            const field = event.target;
+            if (field instanceof HTMLInputElement) {
+              setFieldErrors((previous) => ({
+                ...previous,
+                [field.id]: field.validationMessage,
+              }));
+            }
+          }}
+        >
           <div>
             <label
               className="font-label-sm text-on-surface-variant mb-1.5 block text-xs font-bold uppercase tracking-wider"
@@ -128,14 +172,35 @@ export default function AdminLoginPage() {
                 id="username"
                 type="text"
                 required
+                minLength={5}
+                maxLength={50}
                 disabled={isBusy}
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setUsername(value);
+                  const isDevelopmentAlias =
+                    process.env.NODE_ENV === "development" &&
+                    value.trim().toLowerCase() === "admin";
+                  setFieldErrors((previous) => ({
+                    ...previous,
+                    username: !value.trim()
+                      ? "Email wajib diisi."
+                      : isDevelopmentAlias ||
+                          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+                        ? ""
+                        : "Masukkan alamat email dengan format yang valid.",
+                  }));
+                  setSuccessMsg(null);
+                }}
                 className="bg-surface border-outline-variant text-on-surface focus:border-primary w-full rounded-2xl border py-3.5 pr-4 pl-11 text-sm transition outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-                placeholder="admin@pringgodani.desa.id"
+                placeholder="Admin (development) atau email admin"
                 autoComplete="username"
               />
             </div>
+            {fieldErrors.username && (
+              <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.username}</p>
+            )}
           </div>
 
           <div>
@@ -154,9 +219,23 @@ export default function AdminLoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 required
+                minLength={8}
+                maxLength={50}
                 disabled={isBusy}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setPassword(value);
+                  setFieldErrors((previous) => ({
+                    ...previous,
+                    password: !value
+                      ? "Kata sandi wajib diisi."
+                      : value.length < 8
+                        ? "Kata sandi minimal 8 karakter."
+                        : "",
+                  }));
+                  setSuccessMsg(null);
+                }}
                 className="bg-surface border-outline-variant text-on-surface focus:border-primary w-full rounded-2xl border py-3.5 pr-11 pl-11 text-sm transition outline-none disabled:opacity-60 disabled:cursor-not-allowed font-mono"
                 placeholder="••••••••"
                 autoComplete="current-password"
@@ -178,6 +257,9 @@ export default function AdminLoginPage() {
                 />
               </button>
             </div>
+            {fieldErrors.password && (
+              <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.password}</p>
+            )}
           </div>
 
           {/* Action Button with Dynamic State UX */}
@@ -213,6 +295,14 @@ export default function AdminLoginPage() {
 
         {/* Back Link to Public Website */}
         <div className="mt-6 border-t border-outline-variant/20 pt-4 text-center">
+          <div className="mb-4 flex justify-center gap-4 text-xs font-semibold">
+            <Link href="/admin/forgot-password" className="text-primary hover:underline">
+              Lupa kata sandi?
+            </Link>
+            <Link href="/admin/register" className="text-primary hover:underline">
+              Daftar admin
+            </Link>
+          </div>
           <Link
             href="/"
             className="text-on-surface-variant hover:text-primary inline-flex items-center gap-1.5 text-xs font-semibold transition"

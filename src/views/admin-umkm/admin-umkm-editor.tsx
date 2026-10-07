@@ -25,6 +25,8 @@ export interface ProductInput {
   imageUrl?: string;
 }
 
+const MAX_PRODUCT_PRICE = 999999999999;
+
 export function AdminUmkmEditor({
   isNew = true,
   umkmId,
@@ -351,9 +353,27 @@ export function AdminUmkmEditor({
 
   const validateForm = (): boolean => {
     const fieldErrors: Record<string, string> = {};
-    if (!name.trim()) fieldErrors.name = "Nama usaha wajib diisi";
+    if (!name.trim()) {
+      fieldErrors.name = "Nama usaha wajib diisi";
+    } else if (name.trim().length < 10 || name.length > 50) {
+      fieldErrors.name = "Nama usaha harus terdiri dari 10–50 karakter";
+    }
     if (!ownerName.trim()) fieldErrors.ownerName = "Nama pemilik wajib diisi";
-    if (!phone.trim()) fieldErrors.phone = "Nomor telepon/WhatsApp wajib diisi";
+    if (!phone.trim()) {
+      fieldErrors.phone = "Nomor telepon/WhatsApp wajib diisi";
+    } else if (!/^(?:0\d{9,13}|62\d{8,12}|[+]62\d{8,12})$/.test(phone)) {
+      fieldErrors.phone = "Nomor kontak harus berupa 10–15 karakter numerik dan diawali 0 atau 62";
+    }
+    products.forEach((product, index) => {
+      if (
+        !Number.isInteger(product.price) ||
+        product.price < 0 ||
+        product.price > MAX_PRODUCT_PRICE
+      ) {
+        fieldErrors[`product-price-${index}`] =
+          "Harga harus berupa angka bulat antara 0 dan 999999999999.";
+      }
+    });
     if (!address.trim()) fieldErrors.address = "Alamat usaha wajib diisi";
     if (!description.trim())
       fieldErrors.description = "Deskripsi usaha wajib diisi";
@@ -570,6 +590,21 @@ export function AdminUmkmEditor({
         {/* Kolom Kiri: Formulir Penyuntingan */}
         <form
           onSubmit={handleSubmit}
+          onInvalid={(event) => {
+            const field = event.target;
+            if (
+              field instanceof HTMLInputElement ||
+              field instanceof HTMLTextAreaElement
+            ) {
+              const key = field.id.replace("field-", "");
+              if (key) {
+                setErrors((previous) => ({
+                  ...previous,
+                  [key]: field.validationMessage,
+                }));
+              }
+            }
+          }}
           className="border-outline-variant/30 bg-surface-container-lowest space-y-6 rounded-3xl border p-8 shadow-sm"
         >
           <div className="border-b pb-4">
@@ -591,7 +626,7 @@ export function AdminUmkmEditor({
               />
               <div className="flex-1">
                 <h4 className="text-sm font-bold text-red-800">
-                  Beberapa Kolom Wajib Belum Diisi:
+                  Beberapa Kolom Perlu Diperbaiki:
                 </h4>
                 <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-red-700">
                   {Object.entries(errors).map(([field, msg]) => (
@@ -625,14 +660,31 @@ export function AdminUmkmEditor({
               id="field-name"
               type="text"
               required
+              minLength={10}
+              maxLength={50}
               value={name}
               onChange={(e) => {
-                setName(e.target.value);
-                clearError("name");
+                const value = e.target.value;
+                setName(value);
+                setErrors((previous) => {
+                  const next = { ...previous };
+                  if (!value.trim()) {
+                    next.name = "Nama usaha wajib diisi";
+                  } else if (value.trim().length < 10) {
+                    next.name = "Nama usaha minimal 10 karakter";
+                  } else {
+                    delete next.name;
+                  }
+                  return next;
+                });
               }}
+              aria-describedby="field-name-counter"
               className={`bg-surface w-full rounded-2xl border p-3.5 text-sm font-bold outline-none ${errors.name ? "border-error focus:border-error" : "border-outline-variant text-on-surface focus:border-primary"}`}
               placeholder="Masukkan nama UMKM..."
             />
+            <p id="field-name-counter" className="mt-1 text-xs text-on-surface-variant" aria-live="polite">
+              {name.length}/50 karakter (minimal 10)
+            </p>
             {errors.name && (
               <p className="text-error mt-1.5 text-xs font-semibold">
                 {errors.name}
@@ -731,18 +783,34 @@ export function AdminUmkmEditor({
               </label>
               <input
                 id="field-phone"
-                type="text"
+                type="tel"
                 required
+                minLength={10}
+                maxLength={15}
+                pattern="(0[0-9]{9,13}|62[0-9]{8,12}|[+]62[0-9]{8,12})"
+                inputMode="numeric"
                 value={phone}
                 onChange={(e) => {
-                  setPhone(e.target.value);
-                  clearError("phone");
+                  const value = e.target.value;
+                  setPhone(value);
+                  setErrors((previous) => {
+                    const next = { ...previous };
+                    if (!value.trim()) {
+                      next.phone = "Nomor telepon/WhatsApp wajib diisi";
+                    } else if (!/^(?:0\d{9,13}|62\d{8,12}|[+]62\d{8,12})$/.test(value)) {
+                      next.phone = "Nomor kontak harus berupa 10–15 karakter numerik dan diawali 0 atau 62";
+                    } else {
+                      delete next.phone;
+                    }
+                    return next;
+                  });
                 }}
+                aria-describedby="field-phone-error"
                 className={`bg-surface w-full rounded-2xl border p-3.5 font-mono text-sm outline-none ${errors.phone ? "border-error focus:border-error" : "border-outline-variant text-on-surface focus:border-primary"}`}
                 placeholder="081234567890"
               />
               {errors.phone && (
-                <p className="text-error mt-1.5 text-xs font-semibold">
+                <p id="field-phone-error" className="text-error mt-1.5 text-xs font-semibold">
                   {errors.phone}
                 </p>
               )}
@@ -1138,18 +1206,35 @@ export function AdminUmkmEditor({
                       className="bg-surface-container-lowest border-outline-variant text-on-surface w-full rounded-xl border p-2.5 text-xs font-bold outline-none"
                     />
                     <input
+                      id={`field-product-price-${idx}`}
                       type="number"
+                      min={0}
+                      max={MAX_PRODUCT_PRICE}
+                      step={1}
                       value={p.price || ""}
-                      onChange={(e) =>
-                        updateProduct(
-                          idx,
-                          "price",
-                          e.target.value ? Number(e.target.value) : 0,
-                        )
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value ? Number(e.target.value) : 0;
+                        updateProduct(idx, "price", value);
+                        if (
+                          Number.isInteger(value) &&
+                          value >= 0 &&
+                          value <= MAX_PRODUCT_PRICE
+                        ) {
+                          clearError(`product-price-${idx}`);
+                        }
+                      }}
+                      aria-describedby={`field-product-price-error-${idx}`}
                       placeholder="Harga (Rp)..."
                       className="bg-surface-container-lowest border-outline-variant text-on-surface w-full rounded-xl border p-2.5 font-mono text-xs font-bold outline-none"
                     />
+                    {errors[`product-price-${idx}`] && (
+                      <p
+                        id={`field-product-price-error-${idx}`}
+                        className="col-span-2 text-xs font-semibold text-red-600"
+                      >
+                        {errors[`product-price-${idx}`]}
+                      </p>
+                    )}
                   </div>
 
                   <input

@@ -15,6 +15,45 @@ export default function AdminDashboardPage() {
   const [umkmCount, setUmkmCount] = useState(0);
   const [mapsCount, setMapsCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [apiStatus, setApiStatus] = useState<
+    "checking" | "online" | "offline"
+  >("checking");
+  const [apiError, setApiError] = useState("");
+  const [healthCheckKey, setHealthCheckKey] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let isActive = true;
+
+    const checkApiHealth = async () => {
+      setApiStatus("checking");
+      setApiError("");
+
+      try {
+        const response = await fetch("/api/health", {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Server membalas HTTP ${response.status}`);
+        }
+
+        await response.json();
+        if (isActive) setApiStatus("online");
+      } catch (error) {
+        if (!isActive) return;
+        setApiStatus("offline");
+        setApiError(
+          error instanceof Error ? error.message : "Kesalahan koneksi tidak diketahui",
+        );
+      }
+    };
+
+    void checkApiHealth();
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [healthCheckKey]);
 
   useEffect(() => {
     Promise.all([
@@ -65,6 +104,36 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      <section
+        aria-live="polite"
+        className={`flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between ${
+          apiStatus === "online"
+            ? "border-emerald-500/30 bg-emerald-500/5"
+            : apiStatus === "offline"
+              ? "border-red-500/30 bg-red-500/5"
+              : "border-amber-500/30 bg-amber-500/5"
+        }`}
+      >
+        <div>
+          <h3 className="text-sm font-bold">Status koneksi backend</h3>
+          <p className="mt-1 text-xs text-on-surface-variant">
+            {apiStatus === "checking"
+              ? "Memeriksa /api/health..."
+              : apiStatus === "online"
+                ? "Backend terhubung dan mengembalikan respons JSON."
+                : `Backend tidak terhubung: ${apiError}`}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setHealthCheckKey((key) => key + 1)}
+          disabled={apiStatus === "checking"}
+          className="self-start rounded-xl border border-outline-variant px-3 py-2 text-xs font-semibold transition hover:bg-surface-container disabled:cursor-wait disabled:opacity-60 sm:self-auto"
+        >
+          Cek ulang
+        </button>
+      </section>
 
       {/* Grid Metrik Utama */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

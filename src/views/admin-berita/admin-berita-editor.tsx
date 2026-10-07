@@ -64,6 +64,7 @@ export function AdminBeritaEditor({
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [blockFiles, setBlockFiles] = useState<Record<number, File>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [titleError, setTitleError] = useState("");
 
   const uploadSingleFile = async (
     file: File,
@@ -201,6 +202,16 @@ export function AdminBeritaEditor({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setTitleError("Judul berita wajib diisi.");
+      return;
+    }
+    if (trimmedTitle.length < 10 || title.length > 50) {
+      setTitleError("Judul berita harus terdiri dari 10–50 karakter.");
+      return;
+    }
+    setTitleError("");
     setIsSubmitting(true);
 
     try {
@@ -368,12 +379,35 @@ export function AdminBeritaEditor({
               Judul Berita Utama
             </label>
             <input
+              id="news-title"
               type="text"
+              required
+              minLength={10}
+              maxLength={50}
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="bg-surface border-outline-variant text-on-surface focus:border-primary w-full rounded-2xl border p-3.5 text-sm font-bold outline-none"
+              onChange={(e) => {
+                const value = e.target.value;
+                setTitle(value);
+                setTitleError(
+                  !value.trim()
+                    ? "Judul berita wajib diisi."
+                    : value.trim().length < 10
+                      ? "Judul berita minimal 10 karakter."
+                      : "",
+                );
+              }}
+              aria-describedby="news-title-counter news-title-error"
+              className={`bg-surface w-full rounded-2xl border p-3.5 text-sm font-bold outline-none ${titleError ? "border-error focus:border-error" : "border-outline-variant text-on-surface focus:border-primary"}`}
               placeholder="Masukkan judul berita utama..."
             />
+            <p id="news-title-counter" className="mt-1 text-xs text-on-surface-variant" aria-live="polite">
+              {title.length}/50 karakter (minimal 10)
+            </p>
+            {titleError && (
+              <p id="news-title-error" className="mt-1 text-xs font-semibold text-error">
+                {titleError}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
