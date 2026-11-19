@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
       );
       setSuccessMessage(
         data?.data?.message ||
-          "Jika email terdaftar, instruksi pemulihan akan dikirim.",
+        "Jika email terdaftar, instruksi pemulihan akan dikirim.",
       );
     } catch (error) {
       const responseData = (
@@ -40,8 +40,8 @@ export default function ForgotPasswordPage() {
       ).response?.data;
       setRequestError(
         responseData?.error ||
-          responseData?.message ||
-          "Permintaan reset gagal. Periksa konfigurasi email backend.",
+        responseData?.message ||
+        "Permintaan reset gagal. Periksa konfigurasi email backend.",
       );
     } finally {
       setIsSending(false);
@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
         <p className="text-center mb-6 text-gray-600">
           Masukkan email admin untuk mengirim link pemulihan
         </p>
-        
+
         {/* Notifikasi kesuksesan */}
         {successMessage && (
           <div className="bg-emerald-100 text-emerald-800 p-3 rounded-lg mb-6">
@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
             {requestError}
           </div>
         )}
-        
+
         <form
           className="space-y-4"
           onSubmit={handleSubmit}
@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
             />
             {emailError && <p className="mt-1 text-xs text-red-600">{emailError}</p>}
           </div>
-          
+
           <button
             type="submit"
             disabled={isSending}
